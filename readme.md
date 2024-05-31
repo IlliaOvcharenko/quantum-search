@@ -1,4 +1,4 @@
-#⚛ Quantum Search
+# ⚛ Quantum Search
 
 ## Example
 
