@@ -19,9 +19,11 @@ def main(
     n_grover_iterations: int | None = None,
 
     save_circuit_plot: bool = False,
-    circuit_plot_prefix: str = "",
+    save_state_dist_plot: bool = False,
+    plot_prefix: str = "",
 ):
     np.random.seed(42)
+    plot_prefix = plot_prefix + "-" if plot_prefix != "" else plot_prefix
 
     if array_len is None:
         array = [4, 7, 2, 1, 3, 0, 5, 6]
@@ -128,16 +130,27 @@ def main(
         qc = add_diffuser(qc)
 
     if save_circuit_plot:
-        circuit_plot_prefix = circuit_plot_prefix + "-" if circuit_plot_prefix != "" \
-                              else circuit_plot_prefix
         qc.draw("mpl")
-        plt.savefig(f"figs/{circuit_plot_prefix}qc.png", bbox_inches="tight")
+        plt.savefig(f"figs/{plot_prefix}qc.png", bbox_inches="tight")
 
     qc.measure(index_qbits, icr)
     sampler = Sampler()
     job = sampler.run(qc, shots=64)
     result = job.result()
     index_dist = result.quasi_dists[0]
+
+    if save_state_dist_plot:
+        state_dist = [(k, v) for k, v in index_dist.items()]
+        state = [to_bits(k)[:n_index_qbits] for k, _ in state_dist]
+        state = [s + ("0" * (n_index_qbits - len(s))) for s in state]
+        dist = [v for k, v in state_dist]
+        plt.figure(figsize=(15, 10))
+        plt.bar(state, dist)
+        plt.xlabel("system state")
+        plt.ylabel("probability")
+        plt.grid()
+        plt.savefig(f"figs/{plot_prefix}state-dist.png", bbox_inches="tight")
+
     index_pred = max(index_dist.items(), key=lambda x: x[1])
     print(f"Search result, index: {index_pred[0]}, " \
           f"empirical prob to collapse in this state: {index_pred[1]}")
