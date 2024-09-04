@@ -24,3 +24,5 @@ Prob to collapse into a correct state: 0.90625
 ## Circuit
 ![example-qc](figs/example-qc.png)
 
+This project is licensed under the MIT License – see the LICENSE.md file for details.
+
